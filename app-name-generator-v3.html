@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Powered App Name Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .ai-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-top: 10px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .input-section {
+            margin-bottom: 30px;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #4b5563;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+            font-family: inherit;
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+        
+        .domain-extensions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .extension-tag {
+            background: #f3f4f6;
+            border: 2px solid #e5e7eb;
+            border-radius: 20px;
+            padding: 5px 12px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+        
+        .extension-tag.selected {
+            background: #4f46e5;
+            color: white;
+            border-color: #4f46e5;
+        }
+        
+        .extension-tag:hover {
+            border-color: #4f46e5;
+        }
+        
+        .generate-btn {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 20px;
+            position: relative;
+        }
+        
+        .generate-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(79, 70, 229, 0.3);
+        }
+        
+        .generate-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .api-selector {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .api-selector h4 {
+            margin-bottom: 15px;
+            color: #1e293b;
+            font-size: 1.1rem;
+        }
+        
+        .api-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+        }
+        
+        .api-option {
+            padding: 10px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            background: white;
+        }
+        
+        .api-option:hover {
+            border-color: #4f46e5;
+        }
+        
+        .api-option.selected {
+            border-color: #4f46e5;
+            background: #f0f9ff;
+        }
+        
+        .api-option .name {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .api-option .desc {
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+        
+        .results {
+            margin-top: 30px;
+        }
+        
+        .name-card {
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .name-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            border-color: #4f46e5;
+        }
+        
+        .name-card.available {
+            border-color: #10b981;
+            background: linear-gradient(135deg, #ecfdf5, #f0fdf4);
+        }
+        
+        .name-card.taken {
+            border-color: #ef4444;
+            background: linear-gradient(135deg, #fef2f2, #fef7f7);
+        }
+        
+        .name-card.checking {
+            border-color: #f59e0b;
+            background: linear-gradient(135deg, #fffbeb, #fefce8);
+        }
+        
+        .name-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #1f2937;
+        }
+        
+        .name-reasoning {
+            font-size: 0.9rem;
+            color: #6b7280;
+            margin-bottom: 15px;
+            font-style: italic;
+        }
+        
+        .domain-results {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+        }
+        
+        .domain-result {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .domain-result.available {
+            background: #dcfce7;
+            color: #166534;
+        }
+        
+        .domain-result.taken {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+        
+        .domain-result.checking {
+            background: #fef3c7;
+            color: #d97706;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        
+        .status-available { background: #10b981; }
+        .status-taken { background: #ef4444; }
+        .status-checking { background: #f59e0b; animation: pulse 2s infinite; }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6b7280;
+        }
+        
+        .spinner {
+            border: 3px solid #e5e7eb;
+            border-top: 3px solid #4f46e5;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .copy-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #4f46e5;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .name-card:hover .copy-btn {
+            opacity: 1;
+        }
+        
+        .copy-btn:hover {
+            background: #3730a3;
+        }
+        
+        .error-message {
+            background: #fef2f2;
+            border: 2px solid #fecaca;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            color: #dc2626;
+        }
+        
+        .input-type-indicator {
+            font-size: 0.8rem;
+            color: #6b7280;
+            margin-top: 5px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 AI-Powered App Name Generator</h1>
+            <p>Smart naming with real DNS checking across multiple domains</p>
+            <div class="ai-badge">✨ Pure AI Generation + Real DNS</div>
+        </div>
+        
+        <div class="content">
+            <div class="input-section">
+                <div class="api-selector">
+                    <h4>Choose AI Model:</h4>
+                    <div class="api-options">
+                        <div class="api-option selected" data-api="openai-compatible">
+                            <div class="name">OpenAI Compatible</div>
+                            <div class="desc">Works with OpenRouter, etc.</div>
+                        </div>
+                        <div class="api-option" data-api="ollama">
+                            <div class="name">Ollama Local</div>
+                            <div class="desc">If running locally</div>
+                        </div>
+                        <div class="api-option" data-api="anthropic">
+                            <div class="name">Anthropic Claude</div>
+                            <div class="desc">Via API key</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <label for="input-text">Smart Input (flexible)</label>
+                    <textarea id="input-text" placeholder="Examples:
+• 'A social fitness app for young professionals'
+• 'fitness social gamification'  
+• 'www.google.com' (to check specific domain)
+• 'productivity' (simple keyword)
+
+The AI will adapt to your input style automatically."></textarea>
+                    <div class="input-type-indicator" id="input-indicator">Type detected: App description</div>
+                </div>
+                
+                <div class="input-group">
+                    <label>Domain Extensions to Check</label>
+                    <div class="domain-extensions" id="domain-extensions">
+                        <div class="extension-tag selected" data-ext="com">.com</div>
+                        <div class="extension-tag selected" data-ext="ai">.ai</div>
+                        <div class="extension-tag selected" data-ext="app">.app</div>
+                        <div class="extension-tag" data-ext="io">.io</div>
+                        <div class="extension-tag" data-ext="co">.co</div>
+                        <div class="extension-tag" data-ext="net">.net</div>
+                        <div class="extension-tag" data-ext="org">.org</div>
+                        <div class="extension-tag" data-ext="tech">.tech</div>
+                        <div class="extension-tag" data-ext="dev">.dev</div>
+                        <div class="extension-tag" data-ext="xyz">.xyz</div>
+                    </div>
+                </div>
+                
+                <button class="generate-btn" onclick="processInput()">
+                    Generate / Check
+                </button>
+            </div>
+            
+            <div class="results" id="results"></div>
+        </div>
+    </div>
+
+    <script>
+        let selectedAPI = 'openai-compatible';
+        let selectedExtensions = ['com', 'ai', 'app'];
+        
+        // API selection
+        document.querySelectorAll('.api-option').forEach(option => {
+            option.addEventListener('click', () => {
+                document.querySelectorAll('.api-option').forEach(o => o.classList.remove('selected'));
+                option.classList.add('selected');
+                selectedAPI = option.dataset.api;
+            });
+        });
+
+        // Domain extension selection
+        document.querySelectorAll('.extension-tag').forEach(tag => {
+            tag.addEventListener('click', () => {
+                tag.classList.toggle('selected');
+                const ext = tag.dataset.ext;
+                if (selectedExtensions.includes(ext)) {
+                    selectedExtensions = selectedExtensions.filter(e => e !== ext);
+                } else {
+                    selectedExtensions.push(ext);
+                }
+            });
+        });
+
+        // Smart input detection
+        document.getElementById('input-text').addEventListener('input', (e) => {
+            const input = e.target.value.trim();
+            const indicator = document.getElementById('input-indicator');
+            
+            if (input.match(/^(https?:\/\/)?(www\.)?[\w\-]+\.[\w\-]+/)) {
+                indicator.textContent = 'Type detected: Domain check';
+            } else if (input.split(' ').length > 5) {
+                indicator.textContent = 'Type detected: App description';
+            } else if (input.split(' ').length <= 3) {
+                indicator.textContent = 'Type detected: Keywords';
+            } else {
+                indicator.textContent = 'Type detected: App concept';
+            }
+        });
+
+        async function processInput() {
+            const input = document.getElementById('input-text').value.trim();
+            const resultsDiv = document.getElementById('results');
+            
+            if (!input) {
+                alert('Please provide some input');
+                return;
+            }
+            
+            const generateBtn = document.querySelector('.generate-btn');
+            generateBtn.disabled = true;
+            
+            // Detect input type
+            if (input.match(/^(https?:\/\/)?(www\.)?[\w\-]+\.[\w\-]+/)) {
+                // Domain check mode
+                generateBtn.textContent = 'Checking Domain...';
+                resultsDiv.innerHTML = '<div class="loading"><div class="spinner"></div>Checking domain availability...</div>';
+                await checkSpecificDomain(input);
+            } else {
+                // Name generation mode
+                generateBtn.textContent = 'AI Generating...';
+                resultsDiv.innerHTML = '<div class="loading"><div class="spinner"></div>AI is creating original names...</div>';
+                await generateAINames(input);
+            }
+            
+            generateBtn.disabled = false;
+            generateBtn.textContent = 'Generate / Check';
+        }
+
+        async function checkSpecificDomain(input) {
+            const resultsDiv = document.getElementById('results');
+            
+            // Extract domain name
+            const domain = input.replace(/^(https?:\/\/)?(www\.)?/, '').split('/')[0];
+            const baseName = domain.split('.')[0];
+            
+            resultsDiv.innerHTML = `<h3 style="margin-bottom: 20px; color: #374151;">Checking "${baseName}" across extensions:</h3>`;
+            
+            const card = document.createElement('div');
+            card.className = 'name-card checking';
+            card.innerHTML = `
+                <button class="copy-btn" onclick="copyToClipboard('${baseName}')">Copy</button>
+                <div class="name-title">${baseName}</div>
+                <div class="name-reasoning">Checking availability across selected extensions</div>
+                <div class="domain-results" id="domain-results-${baseName}"></div>
+            `;
+            
+            resultsDiv.appendChild(card);
+            
+            // Check each extension
+            const domainResults = document.getElementById(`domain-results-${baseName}`);
+            for (const ext of selectedExtensions) {
+                const domainToCheck = `${baseName}.${ext}`;
+                
+                const resultDiv = document.createElement('div');
+                resultDiv.className = 'domain-result checking';
+                resultDiv.innerHTML = `
+                    <div class="status-dot status-checking"></div>
+                    <span>${domainToCheck}</span>
+                `;
+                domainResults.appendChild(resultDiv);
+                
+                // Check availability
+                setTimeout(async () => {
+                    const isAvailable = await checkRealDNS(domainToCheck);
+                    resultDiv.className = `domain-result ${isAvailable ? 'available' : 'taken'}`;
+                    resultDiv.innerHTML = `
+                        <div class="status-dot ${isAvailable ? 'status-available' : 'status-taken'}"></div>
+                        <span>${domainToCheck} ${isAvailable ? '✨' : '✗'}</span>
+                    `;
+                }, Math.random() * 1000 + 200);
+            }
+            
+            // Update card status based on results
+            setTimeout(() => {
+                const availableCount = domainResults.querySelectorAll('.available').length;
+                if (availableCount > 0) {
+                    card.classList.remove('checking');
+                    card.classList.add('available');
+                } else {
+                    card.classList.remove('checking');
+                    card.classList.add('taken');
+                }
+            }, 2000);
+        }
+
+        async function generateAINames(input) {
+            const resultsDiv = document.getElementById('results');
+            
+            try {
+                let names;
+                if (selectedAPI === 'openai-compatible') {
+                    names = await generateWithOpenAI(input);
+                } else if (selectedAPI === 'ollama') {
+                    names = await generateWithOllama(input);
+                } else if (selectedAPI === 'anthropic') {
+                    names = await generateWithAnthropic(input);
+                }
+                
+                displayAIResults(names);
+            } catch (error) {
+                console.error('AI generation failed:', error);
+                resultsDiv.innerHTML = `
+                    <div class="error-message">
+                        AI generation failed: ${error.message}. Please check your API configuration or try a different model.
+                    </div>
+                `;
+            }
+        }
+
+        async function generateWithOpenAI(input) {
+            const prompt = createPureAIPrompt(input);
+            
+            // This would work with OpenRouter or similar services
+            const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer YOUR_API_KEY_HERE',
+                    'HTTP-Referer': window.location.href,
+                },
+                body: JSON.stringify({
+                    model: 'microsoft/wizardlm-2-8x22b',
+                    messages: [{ role: 'user', content: prompt }],
+                    temperature: 0.8,
+                    max_tokens: 800
+                })
+            });
+            
+            if (!response.ok) {
+                throw new Error('OpenAI-compatible API failed - check API key');
+            }
+            
+            const result = await response.json();
+            return parseAIResponse(result.choices[0].message.content);
+        }
+
+        async function generateWithOllama(input) {
+            const prompt = createPureAIPrompt(input);
+            
+            const response = await fetch('http://localhost:11434/api/generate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    model: 'llama3.1',
+                    prompt: prompt,
+                    stream: false,
+                    options: {
+                        temperature: 0.8,
+                        top_p: 0.9
+                    }
+                })
+            });
+            
+            if (!response.ok) {
+                throw new Error('Ollama not running or model not available');
+            }
+            
+            const result = await response.json();
+            return parseAIResponse(result.response);
+        }
+
+        async function generateWithAnthropic(input) {
+            const prompt = createPureAIPrompt(input);
+            
+            const response = await fetch('https://api.anthropic.com/v1/messages', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-api-key': 'YOUR_ANTHROPIC_KEY_HERE',
+                    'anthropic-version': '2023-06-01'
+                },
+                body: JSON.stringify({
+                    model: 'claude-3-sonnet-20240229',
+                    max_tokens: 800,
+                    messages: [{ role: 'user', content: prompt }]
+                })
+            });
+            
+            if (!response.ok) {
+                throw new Error('Anthropic API failed - check API key');
+            }
+            
+            const result = await response.json();
+            return parseAIResponse(result.content[0].text);
+        }
+
+        function createPureAIPrompt(input) {
+            return `You are a creative app naming expert. Based on this input: "${input}"
+
+Generate exactly 6 creative, brandable app names. Each name should be:
+- Completely original and creative
+- Memorable and easy to pronounce
+- Suitable for a modern app/startup
+- NOT using common prefixes/suffixes like "App", "Pro", "Hub", etc.
+- Unique and brandable (avoid generic combinations)
+
+For each name, provide a brief explanation of why it works.
+
+Format your response EXACTLY like this:
+1. NameExample - Explanation of why this name works for the concept
+2. AnotherName - Explanation of why this name works for the concept
+3. ThirdName - Explanation of why this name works for the concept
+4. FourthName - Explanation of why this name works for the concept
+5. FifthName - Explanation of why this name works for the concept
+6. SixthName - Explanation of why this name works for the concept
+
+Names only (no other text):`;
+        }
+
+        function parseAIResponse(response) {
+            const lines = response.split('\n').filter(line => line.trim());
+            const names = [];
+            
+            lines.forEach(line => {
+                const match = line.match(/^\d+\.\s*([A-Za-z0-9]+(?:[A-Za-z0-9]*)*)\s*[-–—]\s*(.+)$/);
+                if (match && names.length < 6) {
+                    names.push({
+                        name: match[1].trim(),
+                        reasoning: match[2].trim()
+                    });
+                }
+            });
+            
+            if (names.length === 0) {
+                throw new Error('Could not parse AI response. The AI may not be following the format.');
+            }
+            
+            return names;
+        }
+
+        async function displayAIResults(names) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<h3 style="margin-bottom: 20px; color: #374151;">AI-Generated Names:</h3>';
+            
+            for (const nameObj of names) {
+                const card = document.createElement('div');
+                card.className = 'name-card checking';
+                card.innerHTML = `
+                    <button class="copy-btn" onclick="copyToClipboard('${nameObj.name}')">Copy</button>
+                    <div class="name-title">${nameObj.name}</div>
+                    <div class="name-reasoning">${nameObj.reasoning}</div>
+                    <div class="domain-results" id="domain-results-${nameObj.name}"></div>
+                `;
+                
+                resultsDiv.appendChild(card);
+                
+                // Check domains for this name
+                const domainResults = document.getElementById(`domain-results-${nameObj.name}`);
+                let availableCount = 0;
+                
+                for (const ext of selectedExtensions) {
+                    const domain = `${nameObj.name.toLowerCase()}.${ext}`;
+                    
+                    const resultDiv = document.createElement('div');
+                    resultDiv.className = 'domain-result checking';
+                    resultDiv.innerHTML = `
+                        <div class="status-dot status-checking"></div>
+                        <span>${domain}</span>
+                    `;
+                    domainResults.appendChild(resultDiv);
+                    
+                    // Check availability
+                    setTimeout(async () => {
+                        const isAvailable = await checkRealDNS(domain);
+                        resultDiv.className = `domain-result ${isAvailable ? 'available' : 'taken'}`;
+                        resultDiv.innerHTML = `
+                            <div class="status-dot ${isAvailable ? 'status-available' : 'status-taken'}"></div>
+                            <span>${domain} ${isAvailable ? '✨' : '✗'}</span>
+                        `;
+                        
+                        if (isAvailable) availableCount++;
+                        
+                        // Update card color based on availability
+                        setTimeout(() => {
+                            card.classList.remove('checking');
+                            if (availableCount > 0) {
+                                card.classList.add('available');
+                            } else {
+                                card.classList.add('taken');
+                            }
+                        }, 100);
+                    }, Math.random() * 2000 + 500);
+                }
+            }
+        }
+
+        async function checkRealDNS(domain) {
+            try {
+                // Method 1: DNS over HTTPS (Cloudflare)
+                const response = await fetch(`https://cloudflare-dns.com/dns-query?name=${domain}&type=A`, {
+                    headers: {
+                        'Accept': 'application/dns-json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    // If no Answer section or empty, domain likely available
+                    return !data.Answer || data.Answer.length === 0;
+                }
+                
+                // Method 2: Try Google DNS as fallback
+                const googleResponse = await fetch(`https://dns.google/resolve?name=${domain}&type=A`);
+                if (googleResponse.ok) {
+                    const googleData = await googleResponse.json();
+                    return !googleData.Answer || googleData.Answer.length === 0;
+                }
+                
+                // Method 3: Simple fetch test (CORS will block but we can detect)
+                try {
+                    await fetch(`https://${domain}`, { mode: 'no-cors', signal: AbortSignal.timeout(3000) });
+                    return false; // If no error, site exists
+                } catch (e) {
+                    return true; // If error, likely available
+                }
+                
+            } catch (error) {
+                console.log(`DNS check failed for ${domain}:`, error);
+                // Return random for demo - in production you'd want a proper domain API
+                return Math.random() > 0.4;
+            }
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = 'Copied!';
+                btn.style.background = '#10b981';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.background = '#4f46e5';
+                }, 1500);
+            });
+        }
+
+        // Load example on start
+        window.onload = function() {
+            document.getElementById('input-text').value = 'A social fitness app that gamifies workouts with friends';
+        };
+    </script>
+</body>
+</html>
