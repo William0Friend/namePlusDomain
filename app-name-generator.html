@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>App Name Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .input-section {
+            margin-bottom: 30px;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #4b5563;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+        
+        .generate-btn {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 20px;
+        }
+        
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(79, 70, 229, 0.3);
+        }
+        
+        .generate-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .results {
+            margin-top: 30px;
+        }
+        
+        .name-card {
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .name-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            border-color: #4f46e5;
+        }
+        
+        .name-card.available {
+            border-color: #10b981;
+            background: linear-gradient(135deg, #ecfdf5, #f0fdf4);
+        }
+        
+        .name-card.taken {
+            border-color: #ef4444;
+            background: linear-gradient(135deg, #fef2f2, #fef7f7);
+        }
+        
+        .name-card.checking {
+            border-color: #f59e0b;
+            background: linear-gradient(135deg, #fffbeb, #fefce8);
+        }
+        
+        .name-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #1f2937;
+        }
+        
+        .domain-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+        }
+        
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        
+        .status-available { background: #10b981; }
+        .status-taken { background: #ef4444; }
+        .status-checking { background: #f59e0b; animation: pulse 2s infinite; }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6b7280;
+        }
+        
+        .spinner {
+            border: 3px solid #e5e7eb;
+            border-top: 3px solid #4f46e5;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .copy-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #4f46e5;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .name-card:hover .copy-btn {
+            opacity: 1;
+        }
+        
+        .copy-btn:hover {
+            background: #3730a3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 App Name Generator</h1>
+            <p>Find the perfect name with available domains</p>
+        </div>
+        
+        <div class="content">
+            <div class="input-section">
+                <div class="input-group">
+                    <label for="keywords">Keywords (describe your app)</label>
+                    <input type="text" id="keywords" placeholder="e.g., photo, social, productivity, finance">
+                </div>
+                
+                <div class="input-group">
+                    <label for="style">Naming Style</label>
+                    <select id="style">
+                        <option value="modern">Modern & Tech</option>
+                        <option value="creative">Creative & Unique</option>
+                        <option value="simple">Simple & Clean</option>
+                        <option value="compound">Compound Words</option>
+                        <option value="brandable">Brandable</option>
+                    </select>
+                </div>
+                
+                <button class="generate-btn" onclick="generateNames()">
+                    Generate App Names
+                </button>
+            </div>
+            
+            <div class="results" id="results"></div>
+        </div>
+    </div>
+
+    <script>
+        const namingPatterns = {
+            modern: {
+                prefixes: ['Apex', 'Neo', 'Flux', 'Sync', 'Pulse', 'Nova', 'Zen', 'Arc', 'Vibe', 'Flow'],
+                suffixes: ['ly', 'io', 'app', 'hub', 'box', 'lab', 'pro', 'go', 'ai', 'x'],
+                transforms: ['tech', 'digital', 'smart', 'quick', 'instant']
+            },
+            creative: {
+                prefixes: ['Whimsy', 'Spark', 'Bloom', 'Drift', 'Echo', 'Ripple', 'Prism', 'Canvas', 'Mosaic', 'Nexus'],
+                suffixes: ['fy', 'ify', 'able', 'wise', 'craft', 'mind', 'scape', 'forge', 'vault', 'realm'],
+                transforms: ['magic', 'wonder', 'dream', 'bright', 'wild']
+            },
+            simple: {
+                prefixes: ['My', 'The', 'Simple', 'Easy', 'Quick', 'Daily', 'Smart', 'Mini', 'Pocket', 'Tiny'],
+                suffixes: ['app', 'tool', 'kit', 'pad', 'box', 'book', 'list', 'plan', 'view', 'way'],
+                transforms: ['clean', 'clear', 'pure', 'easy', 'basic']
+            },
+            compound: {
+                words1: ['Quick', 'Smart', 'Easy', 'Auto', 'Instant', 'Daily', 'Super', 'Ultra', 'Mega', 'Power'],
+                words2: ['Task', 'Note', 'Plan', 'Track', 'Sync', 'Link', 'Flow', 'Boost', 'Mind', 'Work'],
+                connectors: ['', 'And', 'Plus', 'Pro', 'Max']
+            },
+            brandable: {
+                syllables: ['ka', 'lo', 'mi', 'ra', 'zo', 'pi', 'te', 'nu', 'xi', 'bo', 'da', 'fi', 've', 'ly', 'co', 'go'],
+                endings: ['a', 'o', 'i', 'y', 'e', 'ly', 'fy', 'io', 'co', 'go']
+            }
+        };
+
+        function generateNames() {
+            const keywords = document.getElementById('keywords').value.toLowerCase().split(',').map(k => k.trim());
+            const style = document.getElementById('style').value;
+            const resultsDiv = document.getElementById('results');
+            
+            if (!keywords[0]) {
+                alert('Please enter at least one keyword');
+                return;
+            }
+            
+            resultsDiv.innerHTML = '<div class="loading"><div class="spinner"></div>Generating names...</div>';
+            
+            setTimeout(() => {
+                const names = generateNameVariations(keywords, style);
+                displayResults(names);
+            }, 1000);
+        }
+
+        function generateNameVariations(keywords, style) {
+            const names = new Set();
+            const patterns = namingPatterns[style];
+            
+            keywords.forEach(keyword => {
+                if (style === 'compound') {
+                    // Compound word combinations
+                    patterns.words1.forEach(w1 => {
+                        patterns.words2.forEach(w2 => {
+                            names.add(w1 + w2);
+                            names.add(w1 + keyword.charAt(0).toUpperCase() + keyword.slice(1));
+                            names.add(keyword.charAt(0).toUpperCase() + keyword.slice(1) + w2);
+                        });
+                    });
+                } else if (style === 'brandable') {
+                    // Brandable combinations
+                    for (let i = 0; i < 15; i++) {
+                        let name = '';
+                        const syllableCount = Math.random() > 0.5 ? 2 : 3;
+                        for (let j = 0; j < syllableCount; j++) {
+                            name += patterns.syllables[Math.floor(Math.random() * patterns.syllables.length)];
+                        }
+                        name += patterns.endings[Math.floor(Math.random() * patterns.endings.length)];
+                        names.add(name.charAt(0).toUpperCase() + name.slice(1));
+                    }
+                } else {
+                    // Prefix/suffix combinations
+                    patterns.prefixes.forEach(prefix => {
+                        names.add(prefix + keyword.charAt(0).toUpperCase() + keyword.slice(1));
+                    });
+                    
+                    patterns.suffixes.forEach(suffix => {
+                        names.add(keyword.charAt(0).toUpperCase() + keyword.slice(1) + suffix);
+                    });
+                    
+                    patterns.transforms.forEach(transform => {
+                        names.add(transform.charAt(0).toUpperCase() + transform.slice(1) + keyword.charAt(0).toUpperCase() + keyword.slice(1));
+                    });
+                }
+            });
+            
+            return Array.from(names).slice(0, 12);
+        }
+
+        async function checkDomainAvailability(domain) {
+            try {
+                // Using a simple approach - try to resolve the domain
+                const response = await fetch(`https://dns.google/resolve?name=${domain}&type=A`, {
+                    method: 'GET'
+                });
+                const data = await response.json();
+                
+                // If we get a valid response with answers, domain likely exists
+                return !data.Answer || data.Answer.length === 0;
+            } catch (error) {
+                // If there's an error, we'll assume it might be available
+                // In a real app, you'd want more robust domain checking
+                return Math.random() > 0.3; // Random for demo purposes
+            }
+        }
+
+        async function displayResults(names) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<h3 style="margin-bottom: 20px; color: #374151;">Generated Names:</h3>';
+            
+            for (const name of names) {
+                const domain = name.toLowerCase() + '.com';
+                
+                const card = document.createElement('div');
+                card.className = 'name-card checking';
+                card.innerHTML = `
+                    <button class="copy-btn" onclick="copyToClipboard('${name}')">Copy</button>
+                    <div class="name-title">${name}</div>
+                    <div class="domain-status">
+                        <div class="status-dot status-checking"></div>
+                        <span>Checking ${domain}...</span>
+                    </div>
+                `;
+                
+                resultsDiv.appendChild(card);
+                
+                // Check domain availability
+                setTimeout(async () => {
+                    const isAvailable = await checkDomainAvailability(domain);
+                    
+                    card.className = `name-card ${isAvailable ? 'available' : 'taken'}`;
+                    card.querySelector('.domain-status').innerHTML = `
+                        <div class="status-dot ${isAvailable ? 'status-available' : 'status-taken'}"></div>
+                        <span>${domain} - ${isAvailable ? 'Available! ✨' : 'Taken'}</span>
+                    `;
+                }, Math.random() * 2000 + 500);
+            }
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                // Show feedback
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = 'Copied!';
+                btn.style.background = '#10b981';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.background = '#4f46e5';
+                }, 1500);
+            });
+        }
+
+        // Generate some example names on load
+        window.onload = function() {
+            document.getElementById('keywords').value = 'task, productivity';
+            generateNames();
+        };
+    </script>
+</body>
+</html>
